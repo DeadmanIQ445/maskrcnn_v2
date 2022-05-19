@@ -32,7 +32,7 @@ no_transform = get_training_augmentation(augment=False)
 
 
 def preprocess_rgb(x):
-    return x/255
+    return x.astype(float)/255
 
 def preprocess_chm_treecanopy(image):
     image[0] = image[0] / 40
@@ -65,8 +65,8 @@ class MaskRCNNDataset(torch.utils.data.Dataset):
         
         with rasterio.open(img_path) as f:
             image = f.read()
-            image = image.astype(float)
-            image = self.preprocess(image)
+            image = self.preprocess(image).astype(np.float32)
+
 
         img = reshape_as_image(image)
         with rasterio.open(mask_path) as f:
@@ -76,7 +76,9 @@ class MaskRCNNDataset(torch.utils.data.Dataset):
         mask = mask.squeeze()
         masks = np.array([mask==id for id in obj_ids])
 
-
+        # transformed = self.transforms(image=img, masks=masks)
+        # img = transformed['image']
+        # mask = transformed['masks']
         # get bounding box coordinates for each mask
         num_objs = len(obj_ids)
         boxes = []
@@ -107,7 +109,9 @@ class MaskRCNNDataset(torch.utils.data.Dataset):
             target["area"] = torch.zeros(1, dtype=torch.float16)
             target["iscrowd"] = torch.zeros(1, dtype=torch.float16)
             if self.transforms is not None:
-                img, target = self.transforms(img, target)
+                transform = self.transforms(image=img, target=target)
+                img = transform['image']
+                target = transform['target']
             return img.float(), target
         area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
         # suppose all instances are not crowd
@@ -122,8 +126,9 @@ class MaskRCNNDataset(torch.utils.data.Dataset):
         target["area"] = area[non_zero]
         target["iscrowd"] = iscrowd[non_zero]
         if self.transforms is not None:
-            img, target = self.transforms(img, target)
-
+            transform = self.transforms(image=img, target=target)
+            img = transform['image']
+            target= transform['target']
         return img.float(), target
 
     def __len__(self):

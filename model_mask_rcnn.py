@@ -108,8 +108,8 @@ def main():
     # our dataset has two classes only - background and person
     num_classes = 2
     # use our dataset and defined transformations
-    dataset = MaskRCNNDataset('/home/ari/data/ZU/test_new_maskrcnn/dataset_10242/train', get_transform(train=True), preprocess=dataset_maskrcnn.preprocess_rgb())
-    dataset_test = MaskRCNNDataset('/home/ari/data/ZU/test_new_maskrcnn/dataset_10242/test', get_transform(train=False), preprocess=dataset_maskrcnn.preprocess_rgb())
+    dataset = MaskRCNNDataset('/home/ari/data/ZU/test_new_maskrcnn/dataset_10242/train', get_transform(train=True), preprocess=dataset_maskrcnn.preprocess_rgb)
+    dataset_test = MaskRCNNDataset('/home/ari/data/ZU/test_new_maskrcnn/dataset_10242/test', get_transform(train=False), preprocess=dataset_maskrcnn.preprocess_rgb)
 
     data_loader = torch.utils.data.DataLoader(
         dataset, batch_size=4, shuffle=True, num_workers=1,
